@@ -4,7 +4,7 @@ import argparse
 def system_info():
    command = "uname"
  
-   parser = argparse.ArgumentParser(description='Python uname command')
+   parser = argparse.ArgumentParser(description='Python uname command clone')
    parser.add_argument('-s', '--name', action='store_true', help='print the kernel name')
    parser.add_argument('-n', '--nodename', action='store_true', help='print the network node hostname')
    parser.add_argument('-r', '--release', action='store_true', help='print the kernel release')
@@ -50,6 +50,7 @@ def system_info():
    else:
     print "%s command_line takes one argument at once \n " % command
     parser.print_help()
+    print "Aborting ..."
 
 def main():
  system_info()
