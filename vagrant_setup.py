@@ -2,43 +2,63 @@ import subprocess
 import argparse
 import os
 import sys
-def vagrant_setup():
-  parser = argparse.ArgumentParser(description='This Python script sets up a linux virtual machine as gateway')
-  parser.add_argument('-v', '--vagrantfile', help='The relatif path of the vagrantfile')
-  parser.add_argument('-c', '--commandline', help='The command line to execute on the remote server')
-  parser.add_argument('-s', '--scriptfile', help='The path of the script to execute')
+import paramiko
+from paramiko import SSHClient
+def display_error(message):
 
-  args = parser.parse_args()
-  if len(sys.argv) == 3:
+   FAIL = '\033[91m'
+   BOLD = '\033[1m'
+   UNDERLINE = '\033[4m'
+   ENDC = '\033[0m'
+   print FAIL + BOLD + UNDERLINE + message + ENDC
+
+def vagrant_setup(func, mes1, mes2, mes3):
+            
+   parser = argparse.ArgumentParser(description='This Python script sets up a linux virtual machine and provision it')
+   parser.add_argument('-v', '--vagrantfile', help='The relatif path of the vagrantfile')
+   parser.add_argument('-c', '--commandline', help='The command line to execute on the remote server, is an alternative for the scriptfile argument')
+   parser.add_argument('-s', '--scriptfile', help='The path of the script to execute, is an alternative for the commandline argument')
+   parser.add_argument('-t', '--type', help='the type of the script to type')
+   args = parser.parse_args()
+    
+   if len(sys.argv) == 7:
+    subprocess.call(["sudo", "vagrant", "plugin", "install", "vagrant-scp"])
     if args.vagrantfile:
+      if args.type is None:
+        func(mes4)
       if os.path.isfile(args.vagrantfile):
         subprocess.call(["mv", "vagrantfile", "./"])
-        subprocess.call(["sudo", "vagrant", "up", "--provision"])
-        subprocess.call(["sudo", "vagrant", "ssh"])
-
-      else:
-        dispaly_error("Vagrantfile is not a file, please check vagrantfile path")       
+        subprocess.call(["sudo", "vagrant", "up", "--provision"])        
+      else:       
+        func(mes1)       
         sys.exit(1)
-    if args.scriptfile :
-      if os.path.isfile(args.scriptfile):
-        subprocess.call([args.scriptfile])          
-      else:
-        dispaly_error("Scriptfile is not a file, please check scriptfile path")         sys.exit(1)
-    elif args.commandline:
-       dispaly_error("Enter a scriptfile or a commandline")
-       sys.exit(1)
-    else: 
-      if args.commandline:
-        subprocess.call([args.commandline])   
-  else: 
-   print "This python script takes exactly two arguments \n "
-   parser.print_help()
-   print "Aborting ..."
+      if args.scriptfile: 
+       if os.path.isfile(args.scriptfile):
+        
+         subprocess.call(["sudo", "vagrant", "scp", args.scriptfile, "/home/vagrant"])
+         subprocess.call(["sudo", "vagrant", "ssh", "-c", args.type + " "+ args.scriptfile])
+       else:
+         func(mes2)      
+         sys.exit(1)
+
+      if args.commandline:                    
+        subprocess.call(["sudo", "vagrant", "ssh", "-c", args.commandline])
+    else:
+        func(mes3)
+        sys.exit(1)
+ 
+   else: 
+    print "This python script takes exactly two arguments \n "
+    parser.print_help()
+    print "Aborting ..."
 
 def main():
- vagrant_setup()
+ message_error1 = "Vagrantfile is not a file, please check vagrantfile path"
+ message_error2 = "Scriptfile is not a file, please check scriptfile path"
+ message_error3 = "Enter the path to your vagrantfile"
+ message_error4 = "Specify the type of the script to invoke"
+ vagrant_setup(display_error, message_error1, message_error2, message_error3)
 
 if __name__ == "__main__":
  main()
-
 
