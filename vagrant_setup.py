@@ -45,7 +45,7 @@ def vagrant_setup(func, mes1, mes2, mes3, mes4, mes5):
         sys.exit(1) 
    else: 
     func(mes5)
-    parser.print_help()
+   parser.print_help()
     print "Aborting ..."
 
 def main():
