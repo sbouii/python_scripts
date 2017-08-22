@@ -16,7 +16,7 @@ def vagrant_setup(func1, func2, mes1, mes2, mes3, mes4, mes5, mes6, mes7):
             
    parser = argparse.ArgumentParser(description='This Python script sets up a linux virtual machine and provision it')
    parser.add_argument('-v', '--vagrantfile', required=True, help='The relatif path of the vagrantfile')
-   parser.add_argument('-c', '--commandline', nargs='+', help='The command line to execute on the remote server, is an alternative for the scriptfile argument')
+   parser.add_argument('-c', '--commandline', help='The command line to execute on the remote server, is an alternative for the scriptfile argument')
    parser.add_argument('-s', '--scriptfile', help='The path of the script to execute, is an alternative for the commandline argument')
    parser.add_argument('-t', '--type', help='the type of the script to type')
    args = parser.parse_args()
@@ -42,7 +42,7 @@ def vagrant_setup(func1, func2, mes1, mes2, mes3, mes4, mes5, mes6, mes7):
          func1(mes2)      
          sys.exit(1)
       if args.commandline:
-        func2(mes7)                    
+        func2(mes7)                            
         subprocess.call(["sudo", "vagrant", "ssh", "-c", args.commandline])
     else:
         func1(mes3)
