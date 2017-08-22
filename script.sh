@@ -1,3 +1,3 @@
 # !/bin/bash
-sudo apt-get install update
-ansible
+sudo apt-get update
+sudo apt-get install ansible
