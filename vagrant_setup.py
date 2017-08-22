@@ -2,6 +2,7 @@ import subprocess
 import argparse
 import os
 import sys
+
 FAIL = '\033[91m'
 BOLD = '\033[1m'
 UNDERLINE = '\033[4m'

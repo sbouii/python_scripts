@@ -22,11 +22,12 @@ def process_action(func1,func2, mes1, mes2):
        process_id = [str(i) for i in output.split()]      
              
        if process_id is None:
-        func1(mes1)
+        func1(mes2)
         sys.exit(1)
        else: 
         for i in process_id:         
-         process = subprocess.call(["kill", i])
+          process = subprocess.call(["kill", "-9", i])
+                                    
       func2(mes2)
       print args.process
    else:
@@ -36,6 +37,7 @@ def process_action(func1,func2, mes1, mes2):
 
 def main():
  message_error = "This python script takes at least two arguments \n "
+ message_error = "There is no process with this name, check the process name"
  message_result = "*** killed process ***\n"
  process_action(dispaly_error,display_result, message_error, message_result)
 
