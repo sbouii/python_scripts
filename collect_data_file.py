@@ -39,7 +39,7 @@ def collect_data(func1, func2, mes1, mes2, mes3):
 def main():
  message_error1 = "This python script takes exactly two arguments \n "
  message_error2 = "Please check the file path"
- message_result = "Collected data"
+ message_result = "*** Collected data ***"
  collect_data(dispaly_error, display_message, message_error1, message_error2, message_result)
 
 if __name__ == "__main__":

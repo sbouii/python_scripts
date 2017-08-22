@@ -2,15 +2,17 @@ import subprocess
 import argparse
 import os
 import sys
+FAIL = '\033[91m'
+BOLD = '\033[1m'
+UNDERLINE = '\033[4m'
+ENDC = '\033[0m'
+OKGREEN = '\033[92m'
+
 def display_error(message):
-
-   FAIL = '\033[91m'
-   BOLD = '\033[1m'
-   UNDERLINE = '\033[4m'
-   ENDC = '\033[0m'
    print FAIL + BOLD + UNDERLINE + message + ENDC
-
-def vagrant_setup(func, mes1, mes2, mes3, mes4, mes5):
+def display_result(message):
+   print OKGREEN +  BOLD + message + ENDC
+def vagrant_setup(func1, func2, mes1, mes2, mes3, mes4, mes5, mes6, mes7):
             
    parser = argparse.ArgumentParser(description='This Python script sets up a linux virtual machine and provision it')
    parser.add_argument('-v', '--vagrantfile', required=True, help='The relatif path of the vagrantfile')
@@ -26,26 +28,28 @@ def vagrant_setup(func, mes1, mes2, mes3, mes4, mes5):
         subprocess.call(["mv", "vagrantfile", "./"])
         subprocess.call(["sudo", "vagrant", "up", "--provision"])        
       else:       
-        func(mes1)       
+        func1(mes1)       
         sys.exit(1)
       if args.scriptfile:
        if args.type is None:
-         func(mes4)
+         func1(mes4)
          sys.exit(1)
        if os.path.isfile(args.scriptfile):        
          subprocess.call(["sudo", "vagrant", "scp", args.scriptfile, "/home/vagrant"])
+         func2(mes6)
          subprocess.call(["sudo", "vagrant", "ssh", "-c", args.type + " "+ args.scriptfile])
        else:
-         func(mes2)      
+         func1(mes2)      
          sys.exit(1)
-      if args.commandline:                    
+      if args.commandline:
+        func2(mes7)                    
         subprocess.call(["sudo", "vagrant", "ssh", "-c", args.commandline])
     else:
-        func(mes3)
+        func1(mes3)
         sys.exit(1) 
    else: 
-    func(mes5)
-   parser.print_help()
+    func1(mes5)
+    parser.print_help()
     print "Aborting ..."
 
 def main():
@@ -54,7 +58,9 @@ def main():
  message_error3 = "Enter the path to your vagrantfile"
  message_error4 = "Specify the type of the script to invoke"
  message_error5 = "This python script takes at least two arguments \n "
- vagrant_setup(display_error, message_error1, message_error2, message_error3, message_error4, message_error5)
+ message_result1 = "** Script execution result **"
+ message_result2 =  "** Command execution result **"
+ vagrant_setup(display_error, display_result, message_error1, message_error2, message_error3, message_error4, message_error5, message_result1, message_result2)
 
 if __name__ == "__main__":
  main()
