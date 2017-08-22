@@ -16,14 +16,15 @@ def display_message(message):
 def collect_data(func1, func2, mes1, mes2, mes3):
    parser = argparse.ArgumentParser(description='This Python script collects data from files')
    parser.add_argument('-f', '--file', required=True, help='The relatif path of the file to collect data from')
-   parser.add_argument('-w', '--word', type=str, required=True, help='The word to use for searching related data')
+   parser.add_argument('-w', '--word',nargs='+', type=str, required=True, help='The word to use for searching related data')
    args = parser.parse_args()
-   if len(sys.argv) == 5:
+   if len(sys.argv) >= 5:
      if args.file:
        if os.path.isfile(args.file):
           with open(str(args.file), 'r') as f:
             for line in f:
-               if re.search(args.word, line, re.M|re.I):
+             for i in args.word:               
+               if re.search(i, line, re.M|re.I):
                     func2(mes3)
                     print line
                        
@@ -37,7 +38,7 @@ def collect_data(func1, func2, mes1, mes2, mes3):
 
 
 def main():
- message_error1 = "This python script takes exactly two arguments \n "
+ message_error1 = "This python script takes at least two arguments \n "
  message_error2 = "Please check the file path"
  message_result = "*** Collected data ***"
  collect_data(dispaly_error, display_message, message_error1, message_error2, message_result)
