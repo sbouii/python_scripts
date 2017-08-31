@@ -1,2 +1,5 @@
 .vagrant/
 *.swp
+*.swn
+*.swo
+*.swm
