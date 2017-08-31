@@ -10,7 +10,7 @@ def desktop_notification(message):
  Notify.Notification.new(message).show()
 
 def logs_notification(func, mes1):
- line_regex = r".sshd.\d+...Server"
+ line_regex = r".sshd.\d+...Failed"
  logging_filename= "/var/log/auth.log"
  subprocess.call(['sudo', 'chmod', '777', logging_filename])
  with open(logging_filename, "r") as f:
