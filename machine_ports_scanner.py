@@ -1,9 +1,5 @@
 import socket
 import os, sys
-import subprocess
-import psutil
-import argparse
-import psutil
 def scan_ports():
   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # s.connect(('INSERT SOME TARGET WEBSITE.com', 'ANY PORT'))
