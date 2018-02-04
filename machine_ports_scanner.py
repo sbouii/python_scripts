@@ -24,11 +24,11 @@ def scan_ports():
     sys.exit()
 
   except socket.gaierror:
-    print 'Hostname could not be resolved. Exiting'
+    print "Couldn't resolve ip address. Exiting"
     sys.exit()
 
   except socket.error:
-    print "Couldn't connect to server"
+    print "Couldn't connect to server. Exiting"
     sys.exit()
 
 def main():
