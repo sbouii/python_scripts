@@ -12,7 +12,7 @@ def scan_ports():
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex((ip_address, port))
         if result == 0:
-            print "Port {}: 	 Open".format(port)
+            print "Port {}:   Open".format(port)
         sock.close()
 
   except KeyboardInterrupt:
