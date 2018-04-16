@@ -1,0 +1,7 @@
+- hosts: localhost
+  sudo: yes
+  tasks:
+   - name: Create directory1
+     file:
+      path: test
+      state: directory
