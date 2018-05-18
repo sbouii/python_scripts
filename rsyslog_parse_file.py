@@ -3,6 +3,6 @@ import re
 
 filecontent = open(/etc/rsyslog.conf, 'r')
 for line in filecontent:
-  print "ok"
+  print line
 
 filecontent.close() 

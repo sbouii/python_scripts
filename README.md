@@ -1,5 +1,2 @@
 # python_scripts
-## dependencies
-for the logging_desktop_notification.py you need to install packages for enabling desktop python notification:
-- python-gobject
-- libnotify-bin
+In order to automate daily linux system administartion , i developed this set of python scripts to make life easier !
