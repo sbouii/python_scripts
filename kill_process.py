@@ -11,7 +11,7 @@ def display_error(message):
 def display_result(message):
    print OKGREEN + BOLD + message + ENDC
 def process_action(func1,func2, mes1, mes2, mes3):
-   parser = argparse.ArgumentParser(description='This Python script collects data from files')
+   parser = argparse.ArgumentParser(description='This Python script kills process by name')
    parser.add_argument('-p', '--process', nargs='+', type=str, required=True, help='The name of the process')
    args = parser.parse_args()
    if len(sys.argv) < 7:
