@@ -11,10 +11,10 @@ def display_error(message):
 def display_result(message):
    print OKGREEN + BOLD + message + ENDC
 def process_action(func1,func2, mes1, mes2, mes3):
-   parser = argparse.ArgumentParser(description='This Python script collects data from files')
+   parser = argparse.ArgumentParser(description='This Python script kills process by name')
    parser.add_argument('-p', '--process', nargs='+', type=str, required=True, help='The name of the process')
    args = parser.parse_args()
-   if len(sys.argv) < 7:
+   if len(sys.argv) < 4:
      if args.process:
       for i in args.process:       
        output = subprocess.Popen(['pidof', i], stdout=subprocess.PIPE).communicate()[0] 
@@ -36,7 +36,7 @@ def process_action(func1,func2, mes1, mes2, mes3):
      print "Aborting ..."
 
 def main():
- message_error1 = "This python script takes at least two arguments \n "
+ message_error1 = "This python script takes exactly one argument \n "
  message_error2 = "There is no process with this name, check the process name"
  message_result = "*** killed process ***\n"
  process_action(display_error,display_result, message_error1, message_error2, message_result)
