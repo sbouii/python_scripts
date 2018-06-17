@@ -33,6 +33,4 @@ def main():
  message_result = "*** Process status: ***"
  check_process_status(display_error, display_result, message_error1, message_result)
 if __name__ == "__main__":
- main()
- 
-
+ main() 
