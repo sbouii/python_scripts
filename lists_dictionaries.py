@@ -27,7 +27,6 @@ def map_two_lists_to_dictionary():
  l2 = ['m', 's', 'f']
  print dict(zip(l1,l2)) 
 
-
 def remove_duplicates_from_list():
  l = [1, 2, 2]
  print list(set(l))
