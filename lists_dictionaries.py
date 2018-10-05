@@ -1,5 +1,5 @@
 
-def get_dictionary():
+def get_dictionary_elements():
  l = {1:'d', 2:'m'}
  print l.items()
  print l.keys() 
