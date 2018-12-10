@@ -1,0 +1,260 @@
+- name: generate required scripts
+  template:
+   src: publish_to_pubsub_queue.j2
+   dest: /tmp/publish_to_pubsub_queue.py
+
+- name: get the required keys
+  copy:
+   src: keys/
+   dest: /tmp/
+  
+- name: activate service account
+  command: gcloud auth activate-service-account --key-file /tmp/sa-{{ d.get('project_id') }}-kubernetes.json
+
+- name: check if a kubernetes cluster already exists
+  command: gcloud container clusters list | grep {{ d.get('name') }}
+  register: check_cluster
+  changed_when: false
+
+- block:
+    - name: end play if the kubernetes cluster already exists
+      debug:
+        msg: "The kubernetes cluster already exists !"
+
+    - meta: end_play
+  when: 'check_cluster.stdout' != ""
+  
+- name: set up the kubernetes cluster
+  command: >
+   gcloud container clusters create %s --quiet
+
+   {% if 'zone' in d.keys() -%}
+   --zone {{ d.get('zone') }}
+   {% endif %}
+
+   {% if 'region' in d.keys() -%}
+   --region {{ d.get('region') }}
+   {% endif %}
+
+   {% if 'additional_zones' in d.keys() -%}
+   --additional-zones {{ d.get('additional_zones') }}
+   {% endif %} 
+
+   {% if 'async' in d.keys() and d.get('async') != False -%}
+   --async 
+   {% endif %} 
+
+   {% if 'addons' in d.keys() -%}
+   --addons {{ d.get('addons') }}
+   {% endif %}
+
+   {% if 'cluster_ipv4_cidr' in d.keys() -%}
+   --cluster-ipv4-cidr {{ d.get('cluster_ipv4_cidr') }}
+   {% endif %}
+
+   {% if 'cluster_secondary_range_name' in d.keys() -%}
+   --cluster-secondary-range-name {{ d.get('cluster_secondary_range_name') }}
+   {% endif %}
+
+   {% if 'cluster_version' in d.keys() -%}
+   --cluster-version {{ d.get('cluster_version') }}
+   {% endif %}
+
+   {% if 'disk_size' in d.keys() -%}
+   --disk-size {{ d.get('disk_size') }}
+   {% endif %}
+
+   {% if 'enable_autorepair' in d.keys() and d.get('enable_autorepair') != False -%}
+   --enable-autorepair 
+   {% endif %}
+
+   {% if 'enable_autoupgrade' in d.keys() and d.get('enable_autoupgrade') != False -%}
+   --enable-autoupgrade 
+   {% endif %}
+
+   {% if 'enable_cloud_logging' in d.keys() and d.get('enable_cloud_logging') != False -%}
+   --enable-cloud-logging 
+   {% endif %}
+
+   {% if 'enable_cloud_monitoring' in d.keys() and d.get('enable_cloud_monitoring') != False -%}
+   --enable-cloud-monitoring 
+   {% endif %}
+
+   {% if 'enable_ip_alias' in d.keys() and d.get('enable_ip_alias') != False -%}
+   --enable-ip-alias 
+   {% endif %}
+
+   {% if 'enable_kubernetes_alpha' in d.keys() and d.get('enable_kubernetes_alpha') != False -%}
+   --enable-kubernetes-alpha 
+   {% endif %}
+
+   {% if 'enable_legacy_authorization' in d.keys() and d.get('enable_legacy_authorization') != False -%}
+   --enable-legacy-authorization 
+   {% endif %}
+
+   {% if 'enable_network_policy' in d.keys() and d.get('enable_network_policy') != False -%}
+   --enable-network-policy 
+   {% endif %}
+
+   {% if 'image_type' in d.keys() -%}
+   --image-type {{ d.get('image_type') }}
+   {% endif %}
+
+   {% if 'no_issue_client_certificate' in d.keys() and d.get('no_issue_client_certificate') != False -%}
+   --no-issue-client-certificate 
+   {% endif %}
+
+   {% if 'labels' in d.keys() -%}
+   --labels {{ d.get('labels') }}
+   {% endif %}
+
+   {% if 'scopes' in d.keys() -%}
+   --scopes {{ d.get('scopes') }}
+   {% endif %}
+
+   {% if 'no_enable_cloud_endpoints' in d.keys() and d.get('no_enable_cloud_endpoints') != False -%}
+   --no-enable-cloud-endpoints 
+   {% endif %}
+
+   {% if 'service_account' in d.keys() -%}
+   --service-account {{ d.get('service_account') }}
+   {% endif %}
+
+   {% if 'password' in d.keys() -%}
+   --password {{ d.get('password') }}
+   {% endif %}
+
+   {% if 'enable_basic_auth' in d.keys() and d.get('enable_basic_auth') != False -%}
+   --enable-basic-auth 
+   {% endif %}
+
+   {% if 'username' in d.keys() -%}
+   --username {{ d.get('username') }}
+   {% endif %}
+
+   {% if 'master_authorized_networks' in d.keys() -%}
+   --master-authorized-networks {{ d.get('master_authorized_networks') }}
+   {% endif %}
+
+   {% if 'enable_master_authorized_networks' in d.keys() and d.get('enable_master_authorized_networks') != False -%}
+   --enable-master-authorized-networks
+   {% endif %}
+
+   {% if 'max_nodes' in d.keys() -%}
+   --max-nodes {{ d.get('max_nodes') }}
+   {% endif %}
+
+   {% if 'min_nodes' in d.keys() -%}
+   --min-nodes {{ d.get('min_nodes') }}
+   {% endif %}
+
+   {% if 'enable_autoscaling' in d.keys() and d.get('enable_autoscaling') != False -%}
+   --enable-autoscaling 
+   {% endif %}
+
+   {% if 'tags' in d.keys() -%}
+   --tags {{ d.get('tags') }}
+   {% endif %}
+
+   {% if 'subnetwork' in d.keys() -%}
+   --subnetwork {{ d.get('subnetwork') }}
+   {% endif %}
+
+   {% if 'local_ssd_count' in d.keys() -%}
+   --local-ssd-count {{ d.get('local_ssd_count') }}
+   {% endif %}
+
+   {% if 'machine_type' in d.keys() -%}
+   --machine-type {{ d.get('machine_type') }}
+   {% endif %}
+
+   {% if 'maintenance_window' in d.keys() -%}
+   --maintenance-window {{ d.get('maintenance_window') }}
+   {% endif %}
+
+   {% if 'max_nodes_per_pool' in d.keys() -%}
+   --max-nodes-per-pool {{ d.get('max_nodes_per_pool') }}
+   {% endif %}
+
+   {% if 'node_labels' in d.keys() -%}
+   --node-labels {{ d.get('node_labels') }}
+   {% endif %}
+
+   {% if 'node_locations' in d.keys() -%}
+   --node-locations {{ d.get('node_locations') }}
+   {% endif %}
+
+   {% if 'node_taints' in d.keys() -%}
+   --node-taints {{ d.get('node_taints') }}
+   {% endif %}
+
+   {% if 'node_version' in d.keys() -%}
+   --node-version {{ d.get('node_version') }}
+   {% endif %}
+
+   {% if 'num_nodes' in d.keys() -%}
+   --num-nodes {{ d.get('num_nodes') }}
+   {% endif %}
+
+   {% if 'preemptible' in d.keys() and d.get('preemptible') != False -%}
+   --preemptible 
+   {% endif %}
+
+   {% if 'services_ipv4_cid' in d.keys() -%}
+   --services-ipv4-cid {{ d.get('services_ipv4_cid') }}
+   {% endif %}
+
+   {% if 'services_secondary_range_name' in d.keys() -%}
+   --services-secondary-range-name {{ d.get('services_secondary_range_name') }}
+   {% endif %}
+
+   {% if 'accelerator' in d.keys() and 'accelerator_type' in d.keys() and not 'accelerator_count' in d.keys() -%}
+   --accelerator type={{ d.get('accelerator_type') }}
+   {% endif %}
+
+   {% if 'accelerator' in d.keys() and 'accelerator_type' in d.keys() and 'accelerator_count' in d.keys() -%}
+   --accelerator type={{ d.get('accelerator_type') }},count={{ d.get('accelerator_count') }}
+   {% endif %}
+
+   {% if 'create_subnetwork' in d.keys() and 'create_subnetwork_name' not in d.keys() and 'create_subnetwork_range' not in d.keys() -%}
+   --create-subnetwork "" 
+   {% endif %}
+
+   {% if 'create_subnetwork' in d.keys() and 'create_subnetwork_name' in d.keys() and 'create_subnetwork_range' not in d.keys() -%}
+   --create-subnetwork name={{ d.get('create_subnetwork_name') }}
+   {% endif %}
+
+   {% if 'create_subnetwork' in d.keys() and 'create_subnetwork_name' not in d.keys() and 'create_subnetwork_range' in d.keys() -%}
+   --create-subnetwork range={{ d.get('create_subnetwork_range') }}
+   {% endif %}
+
+   {% if 'create_subnetwork' in d.keys() and 'create_subnetwork_name' in d.keys() and 'create_subnetwork_range' in d.keys() -%}
+   --create-subnetwork name={{ d.get('create_subnetwork_name') }},range={{ d.get('create_subnetwork_range') }}
+   {% endif %}
+
+  register: create_cluster
+  when: check_cluster.stdout == ""
+  notify:
+   - push the Kubernetes cluster setup status to google pubsub topic
+
+- name: describe  the kubernetes cluster
+  command: >
+   gcloud container clusters describe %s
+   
+   {% if 'zone' in d.keys() -%}
+   --zone {{ d.get('zone') }}
+   {% endif %}
+
+   {% if 'region' in d.keys() -%}
+   --region {{ d.get('region') }}
+   {% endif %}
+
+  register: describe_cluster
+  until: '"RUNNING" in describe_cluster.stdout'
+  retries: 5
+  delay: 3
+  notify:
+   - push the Kubernetes cluster description status to google pubsub topic
+
+- name: get kubernetes credentials
+  command: gcloud container clusters get-credentials %s --zone {{ d.get('zone') }} --project {{ d.get('project_id')

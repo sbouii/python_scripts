@@ -1,0 +1,7 @@
+---
+
+ - name: push the Kubernetes cluster setup status to google pubsub topic
+   command: python /tmp/publish_to_pubsub_queue.py -m "{{ create_cluster.stdout }}"
+   
+ - name: push the Kubernetes cluster description status to google pubsub topic
+   command: python /tmp/publish_to_pubsub_queue.py -m "{{ describe_cluster.stdout }}" 

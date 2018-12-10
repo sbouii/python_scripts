@@ -1,0 +1,144 @@
+- name: check if Cloud SQL Admin API is enabled
+  command: gcloud services list | grep sqladmin.googleapis.com
+  register: check_sqladmin_api
+  changed_when: false
+
+- name: enable Cloud SQL Admin API
+  commad: gcloud services enable sqladmin.googleapis.com
+  when: 'check_sqladmin_api.stdout' == ""
+
+- name: check if the postgres instance already exists
+  command: gcloud sql instances list --zone {{ d.get('zone') }} | grep {{ d.get('instance_name') }}
+  register: check_instance
+  changed_when: false
+
+- block:
+    - name: end play if the postgres instance already exists
+      debug:
+        msg: "The postgres instance already exists !"
+
+    - meta: end_play
+  when: 'check_instance.stdout' != ""
+
+- name: create postgres instnace
+  command: >
+   gcloud sql instances create {{ d.get('instance_name') }}
+   
+   {% if 'database_version' in d.keys() -%}
+   --database_version {{ d.get('database_version') }}
+   {% endif %}
+
+   {% if 'activation_policy' in d.keys() -%}
+   --activation_policy {{ d.get('activation_policy') }}
+   {% endif %}
+
+   {% if 'assign_ip' in d.keys() and d.get('assign_ip') != False -%}
+   --assign_ip
+   {% endif %}
+
+   {% if 'async' in d.keys() and d.get('async') != False -%}
+   --async
+   {% endif %} 
+
+   {% if 'authorized_gae_apps' in d.keys() -%}
+   --authorized_gae_apps {{ d.get('authorized_gae_apps') }}
+   {% endif %}
+
+   {% if 'authorized_networks' in d.keys() -%}
+   --authorized_networks {{ d.get('authorized_networks') }}
+   {% endif %}
+   
+   {% if 'availability_type' in d.keys() -%}
+   --availability_type {{ d.get('availability_type') }}
+   {% endif %}
+
+   {% if 'backup' in d.keys() and d.get('backup') != False -%}
+   --backup {{ d.get('backup') }}
+   {% endif %}
+
+   {% if 'backup_start_time' in d.keys() -%}
+   --backup_start_time {{ d.get('backup_start_time') }}
+   {% endif %}
+
+   {% if 'cpu' in d.keys() -%}
+   --cpu {{ d.get('cpu') }}
+   {% endif %}
+
+   {% if 'database_flags' in d.keys() -%}
+   --database_flags {{ d.get('database_flags') }}
+   {% endif %}
+
+   {% if 'enable_bin_log' in d.keys() and d.get('enable_bin_log') != False -%}
+   --enable_bin_log 
+   {% endif %}
+
+   {% if 'failover_replica_name' in d.keys() -%}
+   --failover_replica_name {{ d.get('failover_replica_name') }}
+   {% endif %}
+
+   {% if 'follow_gae_app' in d.keys() -%}
+   --follow_gae_app {{ d.get('follow_gae_app') }}
+   {% endif %}
+
+   {% if 'gce_zone' in d.keys() -%}
+   --gce_zone {{ d.get('gce_zone') }}
+   {% endif %}
+
+   {% if 'maintenance_release_channel' in d.keys() -%}
+   --maintenance_release_channel {{ d.get('maintenance_release_channel') }}
+   {% endif %}
+   
+   {% if 'maintenance_window_day' in d.keys() -%}
+   --maintenance_window_day {{ d.get('maintenance_window_day') }}
+   {% endif %}
+ 
+   {% if 'maintenance_window_hour' in d.keys() -%}
+   --maintenance_window_hour {{ d.get('maintenance_window_hour') }}
+   {% endif %}
+
+   {% if 'master_instance_name' in d.keys() -%}
+   --master_instance_name {{ d.get('master_instance_name') }}
+   {% endif %}
+
+   {% if 'memory' in d.keys() -%}
+   --memory {{ d.get('memory') }}
+   {% endif %}
+
+   {% if 'pricing_plan' in d.keys() -%}
+   --pricing_plan {{ d.get('pricing_plan') }}
+   {% endif %}
+
+   {% if 'region' in d.keys() -%}
+   --region {{ d.get('region') }}
+   {% endif %}
+
+   {% if 'replica_type' in d.keys() -%}
+   --replica_type {{ d.get('replica_type') }}
+   {% endif %}
+
+   {% if 'replication' in d.keys() -%}
+   --replication {{ d.get('replication') }}
+   {% endif %}
+
+   {% if 'require_ssl' in d.keys() and d.get('require_ssl') != False -%}
+   --require_ssl {{ d.get('require_ssl') }}
+   {% endif %}
+
+   {% if 'storage_auto_increase' in d.keys() and d.get('storage_auto_increase') != False -%}
+   --storage_auto_increase
+   {% endif %}
+
+   {% if 'storage_size' in d.keys() -%}
+   --storage_size {{ d.get('storage_size') }}
+   {% endif %}
+
+   {% if 'storage_type' in d.keys() -%}
+   --storage_type {{ d.get('storage_type') }}
+   {% endif %}
+
+   {% if 'tier' in d.keys() -%}
+   --tier {{ d.get('tier') }}
+   {% endif %}
+
+- name: connect to postgres instance
+  command: gcloud sql connect {{ d.get('instance_name') }} --user=postgres

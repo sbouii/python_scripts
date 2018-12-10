@@ -1,0 +1,24 @@
+- name: check if Cloud SQL Admin API is enabled
+  command: gcloud services list | grep sqladmin.googleapis.com
+  register: check_sqladmin_api
+  changed_when: false
+- name: enable Cloud SQL Admin API
+  commad: gcloud services enable sqladmin.googleapis.com
+  when: 'check_sqladmin_api.stdout' == ""
+- name: check if the postgres instance already exists
+  command: gcloud sql instances list --zone None | grep postgres-database
+  register: check_instance
+  changed_when: false
+- block:
+    - name: end play if the postgres instance already exists
+      debug:
+        msg: "The postgres instance already exists !"
+    - meta: end_play
+  when: 'check_instance.stdout' != ""
+- name: create postgres instnace
+  command: >
+   gcloud sql instances create postgres-database
+   --database_version POSTGRES_9_6
+   --require_ssl False
+- name: connect to postgres instance
+  command: gcloud sql connect postgres-database --user=postgres

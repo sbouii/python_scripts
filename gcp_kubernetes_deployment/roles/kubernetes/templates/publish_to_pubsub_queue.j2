@@ -1,0 +1,15 @@
+import os
+from google.cloud import pubsub
+import argparse
+
+def main():
+ parser = argparse.ArgumentParser(description='This script push logs to Google pubsub queue')
+ parser.add_argument('-m', '--message', required=True, help='the message to be pushed to Google pubsub queue')
+ args = parser.parse_args()
+ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/tmp/sa-{{ project_id }}-pubsub.json'
+ publisher = pubsub.PublisherClient()
+ publisher.publish("{{ pubsub_topic_url }}", args.message)
+ 
+if __name__ == "__main__":
+ main()
+

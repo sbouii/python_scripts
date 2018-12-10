@@ -1,0 +1,14 @@
+
+ - name: push the Dataproc cluster setup status to google pubsub topic
+   command: python /tmp/publish_to_pubsub_queue.py -m "{{ create_cluster.stdout }}"
+
+ - name: push the Dataproc cluster description status to google pubsub topic
+   command: python /tmp/publish_to_pubsub_queue.py -m "{{ describe_cluster.stdout }}"
+
+ - name: push the Dataproc job submit status to google pubsub topic
+   command: python /tmp/publish_to_pubsub_queue.py -m "{{ submit_job.stdout }}"
+  
+ - name: push the Dataproc cluster delete status to google pubsub topic
+   command: python /tmp/publish_to_pubsub_queue.py -m "{{ delete_cluster.stdout }}"
+
+  

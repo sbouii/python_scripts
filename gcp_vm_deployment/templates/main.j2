@@ -1,0 +1,18 @@
+- name: enable the deployment manager and compute engine APIs
+  command: gcloud services enable "{{ d.get('item') }}"
+  with_items:
+   - deploymentmanager.googleapis.com
+   - compute.googleapis.com
+
+- name: deploy the {{ d.get('instance_name') }} instance
+  command: gcloud deployment-manager deployments create {{ d.get('deployment_name') }} --template {{ d.get('template') }} --properties zone:{{ d.get('zone') }},machineType:{{ d.get('machineType') }},deviceName:{{ d.get('deviceName') }},type:{{ d.get('type') }},boot:{{ d.get('boot') }},autoDelete:{{ d.get('autoDelete') }},imageProject:{{ d.get('imageProject') }},imageFamily:{{ d.get('imageFamily') }},networkName:'{{ d.get('networkName') }}',networkType:{{ d.get('networkType') }}
+
+- name: get the status of the {{ d.get('instance_name') }} instance
+  command: gcloud deployment-manager deployments describe {{ d.get('deployment_name') }}
+  register: describe_vm
+  until: '"DONE" in describe_vm.stdout'
+  retries: "{{ d.get('retries') }}"
+  delay: "{{ d.get('delay') }}"
+
+- debug:
+    var: describe_vm.stdout

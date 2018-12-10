@@ -1,0 +1,20 @@
+resources:
+- type: compute.v1.instance
+  name: {{ env["deployment"] }}
+  properties:
+    zone: {{ properties["zone"] }}
+    machineType: zones/{{ properties["zone"] }}/machineTypes/{{ properties["machineType"] }}
+
+    disks:
+    - deviceName: {{ properties["deviceName"] }}
+      type: {{ properties["type"] }}
+      boot: {{ properties["boot"] }}
+      autoDelete: {{ properties["autoDelete"] }}
+      initializeParams:
+        sourceImage: projects/{{ properties["imageProject"] }}/global/images/family/{{ properties["imageFamily"] }}
+    networkInterfaces:
+    - network: global/networks/default
+      # Access Config required to give the instance a public IP address
+      accessConfigs:
+      - name: {{ properties["networkName"] }}
+        type: {{ properties["networkType"] }}

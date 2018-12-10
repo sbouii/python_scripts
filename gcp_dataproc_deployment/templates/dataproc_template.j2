@@ -1,0 +1,243 @@
+  - name: generate required scripts
+    template:
+     src: publish_to_pubsub_queue.j2
+     dest: /tmp/publish_to_pubsub_queue.py
+    
+  - name: get the required keys
+    copy:
+     src: .
+     dest: /tmp/
+
+  - name: check if a dataproc cluster already exists
+    {% if 'zone' in d.keys() -%}
+    command: gcloud dataproc clusters list --zone {{ d.get('zone') }} | grep {{ d.get('name') }}
+    register: check_cluster
+    changed_when: false
+    {% endif %}
+    
+    {% if 'region' in d.keys() -%}
+    command: gcloud dataproc clusters list --zone {{ d.get('region') }} | grep {{ d.get('name') }}
+    register: check_cluster
+    changed_when: false
+    {% endif %}
+
+  - name: activate service account 
+    command: gcloud auth activate-service-account --key-file /tmp/dataproc_keys.json
+  - block:
+     - name: end play if the dataproc cluster already exists
+       debug:
+        msg: "The dataproc cluster already exists !"
+
+     - meta: end_play
+    when: 'check_cluster.stdout' != ""
+
+  - name: set up the Dataproc cluster
+    command: >
+     gcloud dataproc clusters create %s --quiet
+
+     {% if 'zone' in d.keys() -%}
+     --zone {{ d.get('zone') }}
+     {% endif %}
+
+     {% if 'region' in d.keys() -%}
+     --region {{ d.get('region') }}
+     {% endif %}
+
+     {% if 'image' in d.keys() -%}
+     --image {{ d.get('image') }}
+     {% endif %}
+
+     {% if 'image_version' in d.keys() -%}
+     --image-version {{ d.get('image_version') }}
+     {% endif %}
+
+     {% if 'bucket' in d.keys() -%}
+     --bucket {{ d.get('bucket') }}
+     {% endif %}
+
+     {% if 'labels' in d.keys() -%}
+     --labels {{ d.get('labels') }}
+     {% endif %}
+
+     {% if 'metadata' in d.keys() -%}
+     --metadata {{ d.get('metadata') }}
+     {% endif %}
+
+     {% if 'properties' in d.keys() -%}
+     --properties {{ d.get('properties') }}
+     {% endif %}
+
+     {% if 'tags' in d.keys() -%}
+     --tags {{ d.get('tags') }} 
+     {% endif %}
+
+     {% if 'master_machine_type' in d.keys() -%}
+     --master-machine-type {{ d.get('master_machine_type') }}
+     {% endif %}
+
+     {% if 'master_boot_disk_size' in d.keys() -%}
+     --master-boot-disk-size {{ d.get('master_boot_disk_size') }}
+     {% endif %}
+
+     {% if 'master_boot_disk_type' in d.keys() -%}
+     --master-boot-disk-type {{ d.get('master_boot_disk_type') }}
+     {% endif %}
+
+     {% if 'num_master_local_ssds' in d.keys() -%}
+     --num-master-local-ssds {{ d.get('num_master_local_ssds') }}
+     {% endif %}
+
+     {% if 'masters_number' in d.keys() -%}
+     --num-masters {{ d.get('masters_number') }}
+     {% endif %}
+
+     {% if 'worker_machine_type' in d.keys() -%}
+     --worker-machine-type {{ d.get('worker_machine_type') }}
+     {% endif %}
+  
+     {% if 'worker_boot_disk_type' in d.keys() -%}
+     --worker-boot-disk-type {{ d.get('worker_boot_disk_type') }}
+     {% endif %}
+
+     {% if 'worker_boot_disk_size' in d.keys() -%}
+     --worker-boot-disk-size {{ d.get('worker_boot_disk_size') }}
+     {% endif %}
+
+     {% if 'num_worker_local_ssds' in d.keys() -%}
+     --num-worker-local-ssds {{ d.get('num_worker_local_ssds') }}
+     {% endif %}
+
+     {% if 'num_preemptible_workers' in d.keys() -%}
+     --num-preemptible-workers {{ d.get('num_preemptible_workers') }}
+     {% endif %}
+
+     {% if 'preemptible_worker_boot_disk_size' in d.keys() -%}
+     --preemptible-worker-boot-disk-size {{ d.get('preemptible_worker_boot_disk_size') }}
+     {% endif %}
+
+     {% if 'preemptible_worker_boot_disk_type' in d.keys() -%}
+     --preemptible-worker-boot-disk-type {{ d.get('preemptible_worker_boot_disk_type') }}
+     {% endif %}
+
+     {% if 'workers_number' in d.keys() -%}
+     --num-workers {{ d.get('workers_number') }}
+     {% endif %}
+
+     {% if 'initialization_actions' in d.keys() -%}
+     --initialization-actions {{ d.get('initialization_actions') }}
+     {% endif %}
+
+     {% if 'initialization_actions_timeout' in d.keys() -%}
+     --initialization-actions-timeout {{ d.get('initialization_actions_timeout') }}
+     {% endif %}
+
+     {% if 'network' in d.keys() -%}
+     --network  {{ d.get('network') }}
+     {% endif %}
+
+     {% if 'subnet' in d.keys() -%}
+     --subnet  {{ d.get('subnet') }}
+     {% endif %}
+
+     {% if 'single_node' in d.keys() and d.get('async') != False -%}
+     --single-node 
+     {% endif %}
+
+     {% if 'scopes' in d.keys() -%}
+     --scopes {{ d.get('scopes') }}
+     {% endif %}
+
+     {% if 'async' in d.keys() and d.get('async') != False -%}
+     --async 
+     {% endif %} 
+
+    register: create_cluster
+    notify:
+     - push the Dataproc cluster setup status to google pubsub topic
+ 
+  - name: wait for the cluster to start
+    command:  gcloud dataproc clusters describe %s
+    register: describe_cluster
+    until: '"RUNNING" in describe_cluster.stdout'
+    retries: 5
+    delay: 3
+    notify:
+     - push the Dataproc cluster description status to google pubsub topic
+    
+  {% if 'job_language' in d.keys() and d.get('job_language') == 'python'-%}
+
+  - name: submit the PySpark job to the cluster
+    command: >
+     gcloud dataproc jobs submit pyspark %s --cluster %s  
+  {% endif %}
+  
+  {% if 'job_language' in d.keys() and d.get('job_language') == 'jar' -%}
+ 
+  - name: submit the Hadoop job to the cluster
+    command: >
+     gcloud dataproc jobs submit hadoop --cluster %s
+  {% endif %}
+
+     {% if 'job_archives' in d.keys() -%}
+     --archives ../roles/dataproc/files/{{ d.get('job_archives') }}
+     {% endif %}
+
+     {% if 'job_async' in d.keys() -%}
+     --async  {{ d.get('job_async') }}
+     {% endif %}
+
+     {% if 'job_bucket' in d.keys() -%}
+     --bucket  {{ d.get('job_bucket') }}
+     {% endif %}
+
+     {% if 'job_driver_log_levels' in d.keys() -%}
+     --driver-log-levels {{ d.get('job_driver_log_levels') }}
+     {% endif %}
+
+     {% if 'job_files' in d.keys() -%}
+     --files  ../roles/dataproc/files/{{ d.get('job_files') }}
+     {% endif %}
+
+     {% if 'job_jars' in d.keys() -%}
+     --jars  ../roles/dataproc/files/{{ d.get('job_jars') }}
+     {% endif %}
+
+     {% if 'job_labels' in d.keys() -%}
+     --labels  {{ d.get('job_labels') }}
+     {% endif %}
+
+     {% if 'job_max_failures_per_hour' in d.keys() -%}
+     --max-failures-per-hour {{ d.get('job_max_failures_per_hour') }}
+     {% endif %}
+
+     {% if 'job_properties' in d.keys() -%}
+     --properties {{ d.get('job_properties') }}
+     {% endif %}
+
+     {% if d.get('job_language') == 'python' and 'job_py_files' in d.keys() -%}
+     --py-files ../roles/dataproc/files/{{ d.get(job_py_files) }}
+     {% endif %}
+
+     {% if d.get('job_language') == 'jar' and 'job_jar' in d.keys() -%}
+     --jar ../roles/dataproc/files/{{ d.get(job_jar) }}
+     {% endif %}
+
+     {% if d.get('job_language') == 'jar' and 'job_class' in d.keys() -%}
+     --class {{ d.get('job_class') }}
+     {% endif %}
+     
+     {% if 'job_arguments' in d.keys() -%}
+     -- {{ d.get('job_arguments') }}
+     {% endif %}
+ 
+    register: submit_job
+    when: '"RUNNING" in describe_cluster.stdout'
+    notify:
+     - push the Dataproc job submit status to google pubsub topic
+
+  - name: delete the cluster once the job is done
+    command:  gcloud dataproc clusters delete %s
+    register: delete_cluster
+    when: '"DONE" in submit_job.stdout'
+    notify:
+     - push the Dataproc cluster delete status to google pubsub topic

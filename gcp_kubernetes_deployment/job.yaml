@@ -1,0 +1,13 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ansible
+spec:
+  template:
+    metadata:
+      name: ansible
+    spec:
+      containers:
+      - name: ansible
+        image: gcr.io/robust-root-125814/smart-ansible
+      restartPolicy: Never
